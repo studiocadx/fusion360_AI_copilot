@@ -5,154 +5,381 @@
     <title>AI Copilot for Fusion 360</title>
     <script src="static/palette.js"></script>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        * {
             margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            padding: 20px;
-        }
-        h1 {
-            color: #333;
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 24px;
-        }
-        .ai-input-section {
-            margin-bottom: 30px;
-        }
-        .ai-input-section h3 {
-            color: #555;
-            margin-bottom: 15px;
-            font-size: 18px;
-        }
-        #aiCommandInput {
-            width: 100%;
-            height: 100px;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 6px;
-            font-size: 14px;
-            font-family: inherit;
-            resize: vertical;
+            padding: 0;
             box-sizing: border-box;
         }
-        #aiCommandInput:focus {
-            outline: none;
-            border-color: #007ACC;
-            box-shadow: 0 0 5px rgba(0,122,204,0.3);
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
         }
+
+        .container {
+            max-width: 650px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        }
+
+        h1 {
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 28px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .ai-input-section {
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            color: #e0e0e0;
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            border-radius: 2px;
+        }
+
+        #aiCommandInput {
+            width: 100%;
+            height: 120px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            font-size: 15px;
+            font-family: inherit;
+            color: #ffffff;
+            resize: vertical;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        #aiCommandInput::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        #aiCommandInput:focus {
+            border-color: rgba(0, 212, 255, 0.5);
+            box-shadow: 
+                0 0 20px rgba(0, 212, 255, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.12);
+        }
+
         .button-container {
-            margin-top: 15px;
+            margin-top: 20px;
             text-align: center;
         }
+
         .ai-button {
-            background: linear-gradient(135deg, #007ACC, #005a9e);
-            color: white;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: #ffffff;
             border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
+            padding: 16px 32px;
+            border-radius: 50px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            min-width: 150px;
+            min-width: 180px;
+            box-shadow: 
+                0 4px 20px rgba(0, 212, 255, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
         }
+
+        .ai-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .ai-button:hover::before {
+            left: 100%;
+        }
+
         .ai-button:hover {
-            background: linear-gradient(135deg, #005a9e, #004080);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0,122,204,0.3);
+            background: linear-gradient(135deg, #0099cc, #007acc);
+            transform: translateY(-2px);
+            box-shadow: 
+                0 8px 25px rgba(0, 212, 255, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
         }
+
         .ai-button:active {
             transform: translateY(0);
         }
+
         .ai-button:disabled {
-            background: #ccc;
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.5);
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
         }
+
+        .mock-models-section {
+            margin-bottom: 32px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 24px;
+        }
+
+        .mock-models-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .mock-model-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mock-model-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #00d4ff, #0099cc, #00d4ff);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .mock-model-card:hover::before {
+            transform: translateX(0);
+        }
+
+        .mock-model-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(0, 212, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.2);
+        }
+
+        .mock-model-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .mock-model-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+
+        .mock-model-desc {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.4;
+        }
+
         .response-section {
-            margin-top: 30px;
+            margin-top: 32px;
         }
-        .response-section h3 {
-            color: #555;
-            margin-bottom: 15px;
-            font-size: 18px;
-        }
+
         #aiResponse {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 6px;
-            padding: 15px;
-            min-height: 60px;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            min-height: 80px;
             font-family: 'Consolas', 'Monaco', monospace;
             font-size: 13px;
-            line-height: 1.5;
-            color: #333;
+            line-height: 1.6;
+            color: #e0e0e0;
             white-space: pre-wrap;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
         }
+
         .status {
-            padding: 10px;
-            border-radius: 4px;
-            margin: 10px 0;
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin: 16px 0;
             font-weight: 500;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
         }
+
+        .status::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            border-radius: 0 2px 2px 0;
+        }
+
         .status.loading {
-            background: #e3f2fd;
-            color: #1976d2;
-            border-left: 4px solid #2196f3;
+            background: rgba(33, 150, 243, 0.15);
+            color: #64b5f6;
+            border-color: rgba(33, 150, 243, 0.3);
         }
+
+        .status.loading::before {
+            background: linear-gradient(180deg, #2196f3, #64b5f6);
+        }
+
         .status.success {
-            background: #e8f5e8;
-            color: #2e7d32;
-            border-left: 4px solid #4caf50;
+            background: rgba(76, 175, 80, 0.15);
+            color: #81c784;
+            border-color: rgba(76, 175, 80, 0.3);
         }
+
+        .status.success::before {
+            background: linear-gradient(180deg, #4caf50, #81c784);
+        }
+
         .status.error {
-            background: #ffebee;
-            color: #c62828;
-            border-left: 4px solid #f44336;
+            background: rgba(244, 67, 54, 0.15);
+            color: #e57373;
+            border-color: rgba(244, 67, 54, 0.3);
         }
+
+        .status.error::before {
+            background: linear-gradient(180deg, #f44336, #e57373);
+        }
+
         .examples {
             margin-top: 20px;
-            padding: 15px;
-            background: #f0f7ff;
-            border-radius: 6px;
-            border-left: 4px solid #007ACC;
+            padding: 20px;
+            background: rgba(0, 212, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
         }
+
         .examples h4 {
-            margin: 0 0 10px 0;
-            color: #333;
+            margin: 0 0 12px 0;
+            color: #00d4ff;
             font-size: 14px;
+            font-weight: 600;
         }
+
         .examples ul {
             margin: 0;
             padding-left: 20px;
             font-size: 13px;
-            color: #666;
+            color: rgba(255, 255, 255, 0.8);
         }
+
         .examples li {
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            position: relative;
         }
-        hr {
-            border: none;
-            height: 1px;
-            background: #eee;
-            margin: 30px 0;
+
+        .examples li::marker {
+            color: #00d4ff;
         }
-        .legacy-section {
-            opacity: 0.7;
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
         }
-        .legacy-section h3 {
-            font-size: 16px;
-            color: #777;
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Animation for loading */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .loading-animation {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        /* Responsive design */
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                padding: 20px;
+                border-radius: 20px;
+            }
+
+            .mock-models-grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
         }
     </style>
 </head>
@@ -161,10 +388,10 @@
     <h1>🤖 AI Copilot for Fusion 360</h1>
     
     <div class="ai-input-section">
-        <h3>Natural Language Commands</h3>
+        <h3 class="section-title">Natural Language Commands</h3>
         <textarea 
             id="aiCommandInput" 
-            placeholder="Type your command here... e.g., 'Create a 20mm cube' or 'Make a cylinder with radius 15mm and height 30mm'"
+            placeholder="Describe what you want to create... e.g., 'Create a 20mm cube' or 'Make a cylinder with radius 15mm and height 30mm'"
         ></textarea>
         
         <div class="button-container">
@@ -184,30 +411,50 @@
         </div>
     </div>
 
-    <div class="response-section">
-        <h3>AI Response & Status</h3>
-        <div id="aiResponse">Ready to receive commands...</div>
+    <div class="mock-models-section">
+        <h3 class="section-title">Quick Model Templates</h3>
+        <div class="mock-models-grid">
+            <div class="mock-model-card" onclick="insertMockCommand('Create a 20mm cube')">
+                <span class="mock-model-icon">🟦</span>
+                <div class="mock-model-title">Standard Cube</div>
+                <div class="mock-model-desc">20mm × 20mm × 20mm cube</div>
+            </div>
+            
+            <div class="mock-model-card" onclick="insertMockCommand('Make a cylinder with radius 10mm and height 25mm')">
+                <span class="mock-model-icon">🔵</span>
+                <div class="mock-model-title">Basic Cylinder</div>
+                <div class="mock-model-desc">Radius: 10mm, Height: 25mm</div>
+            </div>
+            
+            <div class="mock-model-card" onclick="insertMockCommand('Create a sphere with radius 8mm')">
+                <span class="mock-model-icon">⚪</span>
+                <div class="mock-model-title">Small Sphere</div>
+                <div class="mock-model-desc">Radius: 8mm</div>
+            </div>
+            
+            <div class="mock-model-card" onclick="insertMockCommand('Create a 50mm cube')">
+                <span class="mock-model-icon">🟫</span>
+                <div class="mock-model-title">Large Cube</div>
+                <div class="mock-model-desc">50mm × 50mm × 50mm cube</div>
+            </div>
+            
+            <div class="mock-model-card" onclick="insertMockCommand('Make a cylinder with radius 5mm and height 40mm')">
+                <span class="mock-model-icon">🔴</span>
+                <div class="mock-model-title">Thin Cylinder</div>
+                <div class="mock-model-desc">Radius: 5mm, Height: 40mm</div>
+            </div>
+            
+            <div class="mock-model-card" onclick="insertMockCommand('Create a sphere with radius 15mm')">
+                <span class="mock-model-icon">🟡</span>
+                <div class="mock-model-title">Medium Sphere</div>
+                <div class="mock-model-desc">Radius: 15mm</div>
+            </div>
+        </div>
     </div>
 
-    <hr>
-
-    <div class="legacy-section">
-        <h3>Legacy Test Functions</h3>
-        <div style='margin-left: 20px;'>
-            <label for="sampleData"><b>Test Data:</b></label>
-            <input type="text" id="sampleData" value="Enter Some Text"><br/><br/>
-            <button type='button' onclick='sendInfoToFusion()' style='background-color: #cccccc; padding: 5px'>
-                <b>Send Test Event</b>
-            </button>
-        </div>
-
-        <h3>Test Response Value:</h3>
-        <div id='returnValue' style='margin-left: 20px;'>Response</div>
-
-        <h3>Message from "Send to Palette" Command</h3>
-        <div style='margin-left: 20px;'>
-            <p id='fusionMessage'>Message from Fusion</p>
-        </div>
+    <div class="response-section">
+        <h3 class="section-title">AI Response & Status</h3>
+        <div id="aiResponse">Ready to receive commands...</div>
     </div>
 </div>
 </body>

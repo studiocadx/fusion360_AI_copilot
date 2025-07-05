@@ -5,6 +5,19 @@ function getDateString() {
     return `Date: ${date}, Time: ${time}`;
 }
 
+// New function to insert mock commands
+function insertMockCommand(command) {
+    const commandInput = document.getElementById("aiCommandInput");
+    commandInput.value = command;
+    commandInput.focus();
+    
+    // Add a subtle animation to show the command was inserted
+    commandInput.style.transform = "scale(1.02)";
+    setTimeout(() => {
+        commandInput.style.transform = "scale(1)";
+    }, 200);
+}
+
 // Legacy function for testing
 function sendInfoToFusion() {
     const args = {
@@ -34,6 +47,7 @@ function sendAICommand() {
     // Disable button and show loading state
     submitBtn.disabled = true;
     submitBtn.textContent = "🔄 Processing...";
+    submitBtn.classList.add("loading-animation");
     showStatus("Sending command to AI Copilot...", "loading");
     
     const commandData = {
@@ -56,6 +70,7 @@ function sendAICommand() {
             // Re-enable button
             submitBtn.disabled = false;
             submitBtn.textContent = "🚀 Execute Command";
+            submitBtn.classList.remove("loading-animation");
         });
 }
 

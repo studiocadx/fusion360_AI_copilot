@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>AI Copilot for Fusion 360</title>
+    <title>CadxStudio AI Copilot for Fusion 360</title>
     <script src="static/palette.js"></script>
     <style>
         * {
@@ -43,6 +43,29 @@
             right: 0;
             height: 1px;
             background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        }
+
+        .brand-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .brand-logo {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00d4ff, #0099cc, #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+        }
+
+        .brand-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 16px;
+            font-weight: 300;
+            letter-spacing: 1px;
         }
 
         h1 {
@@ -377,21 +400,24 @@
                 grid-template-columns: 1fr;
             }
 
-            h1 {
-                font-size: 24px;
+            .brand-logo {
+                font-size: 28px;
             }
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>🤖 AI Copilot for Fusion 360</h1>
+    <div class="brand-header">
+        <div class="brand-logo">CadxStudio</div>
+        <div class="brand-subtitle">AI Copilot for Fusion 360</div>
+    </div>
     
     <div class="ai-input-section">
         <h3 class="section-title">Natural Language Commands</h3>
         <textarea 
             id="aiCommandInput" 
-            placeholder="Describe what you want to create... e.g., 'Create a 20mm cube' or 'Make a cylinder with radius 15mm and height 30mm'"
+            placeholder="Describe what you want to create... e.g., 'Create a gear with 24 teeth' or 'Make a hole with diameter 8mm'"
         ></textarea>
         
         <div class="button-container">
@@ -403,10 +429,11 @@
         <div class="examples">
             <h4>💡 Example Commands:</h4>
             <ul>
-                <li>"Create a 10mm cube"</li>
-                <li>"Make a cylinder with radius 5mm and height 20mm"</li>
-                <li>"Create a sphere with diameter 15mm"</li>
-                <li>"Extrude the selected face by 5mm"</li>
+                <li>"Create a gear with 24 teeth and 6mm bore"</li>
+                <li>"Make a hole with diameter 8mm and depth 15mm"</li>
+                <li>"Create a 20mm cube"</li>
+                <li>"Make a cylinder with radius 10mm and height 25mm"</li>
+                <li>"Create a sphere with radius 12mm"</li>
             </ul>
         </div>
     </div>
@@ -414,10 +441,34 @@
     <div class="mock-models-section">
         <h3 class="section-title">Quick Model Templates</h3>
         <div class="mock-models-grid">
+            <div class="mock-model-card" onclick="insertMockCommand('Create a gear with 20 teeth, module 2mm, and bore 6mm')">
+                <span class="mock-model-icon">⚙️</span>
+                <div class="mock-model-title">Spur Gear</div>
+                <div class="mock-model-desc">20 teeth, 2mm module, 6mm bore</div>
+            </div>
+            
+            <div class="mock-model-card" onclick="insertMockCommand('Create a gear with 30 teeth, module 1.5mm, and bore 8mm')">
+                <span class="mock-model-icon">🔧</span>
+                <div class="mock-model-title">Fine Gear</div>
+                <div class="mock-model-desc">30 teeth, 1.5mm module, 8mm bore</div>
+            </div>
+            
+            <div class="mock-model-card" onclick="insertMockCommand('Make a hole with diameter 6mm and depth 10mm')">
+                <span class="mock-model-icon">🕳️</span>
+                <div class="mock-model-title">Standard Hole</div>
+                <div class="mock-model-desc">6mm diameter, 10mm depth</div>
+            </div>
+            
+            <div class="mock-model-card" onclick="insertMockCommand('Make a hole with diameter 3mm and depth 5mm')">
+                <span class="mock-model-icon">⚫</span>
+                <div class="mock-model-title">Small Hole</div>
+                <div class="mock-model-desc">3mm diameter, 5mm depth</div>
+            </div>
+            
             <div class="mock-model-card" onclick="insertMockCommand('Create a 20mm cube')">
                 <span class="mock-model-icon">🟦</span>
                 <div class="mock-model-title">Standard Cube</div>
-                <div class="mock-model-desc">20mm × 20mm × 20mm cube</div>
+                <div class="mock-model-desc">20mm × 20mm × 20mm</div>
             </div>
             
             <div class="mock-model-card" onclick="insertMockCommand('Make a cylinder with radius 10mm and height 25mm')">
@@ -432,29 +483,17 @@
                 <div class="mock-model-desc">Radius: 8mm</div>
             </div>
             
-            <div class="mock-model-card" onclick="insertMockCommand('Create a 50mm cube')">
-                <span class="mock-model-icon">🟫</span>
-                <div class="mock-model-title">Large Cube</div>
-                <div class="mock-model-desc">50mm × 50mm × 50mm cube</div>
-            </div>
-            
-            <div class="mock-model-card" onclick="insertMockCommand('Make a cylinder with radius 5mm and height 40mm')">
-                <span class="mock-model-icon">🔴</span>
-                <div class="mock-model-title">Thin Cylinder</div>
-                <div class="mock-model-desc">Radius: 5mm, Height: 40mm</div>
-            </div>
-            
-            <div class="mock-model-card" onclick="insertMockCommand('Create a sphere with radius 15mm')">
-                <span class="mock-model-icon">🟡</span>
-                <div class="mock-model-title">Medium Sphere</div>
-                <div class="mock-model-desc">Radius: 15mm</div>
+            <div class="mock-model-card" onclick="insertMockCommand('Create a gear with 40 teeth, module 3mm, bore 12mm, and thickness 8mm')">
+                <span class="mock-model-icon">⚙️</span>
+                <div class="mock-model-title">Large Gear</div>
+                <div class="mock-model-desc">40 teeth, 3mm module, 12mm bore</div>
             </div>
         </div>
     </div>
 
     <div class="response-section">
         <h3 class="section-title">AI Response & Status</h3>
-        <div id="aiResponse">Ready to receive commands...</div>
+        <div id="aiResponse">Ready to receive commands from CadxStudio AI Copilot...</div>
     </div>
 </div>
 </body>

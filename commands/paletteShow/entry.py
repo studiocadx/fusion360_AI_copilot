@@ -12,9 +12,9 @@ ui = app.userInterface
 
 # TODO ********************* Change these names *********************
 CMD_ID = f'{config.COMPANY_NAME}_{config.ADDIN_NAME}_PalleteShow'
-CMD_NAME = 'AI Copilot Palette'
-CMD_Description = 'AI-powered natural language interface for Fusion 360'
-PALETTE_NAME = 'AI Copilot for Fusion 360'
+CMD_NAME = 'CadxStudio AI Copilot'
+CMD_Description = 'CadxStudio AI-powered natural language interface for Fusion 360'
+PALETTE_NAME = 'CadxStudio AI Copilot for Fusion 360'
 IS_PROMOTED = True
 
 # Using "global" variables by referencing values from /config.py
@@ -194,7 +194,7 @@ def palette_incoming(html_args: adsk.core.HTMLEventArgs):
             processing_response = {
                 "status": "processing",
                 "originalCommand": user_command,
-                "message": "AI is analyzing your command..."
+                "message": "CadxStudio AI is analyzing your command..."
             }
             palette.sendInfoToHTML("aiResponse", json.dumps(processing_response))
             

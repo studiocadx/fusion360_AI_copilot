@@ -63,13 +63,15 @@ class AIService:
     def _process_with_openai(self, user_command: str) -> Dict[str, Any]:
         """Process command using OpenAI API"""
         
-        system_prompt = """You are an AI assistant for Fusion 360 CAD software. 
+        system_prompt = """You are an AI assistant for Fusion 360 CAD software by CadxStudio. 
         Convert natural language commands into structured JSON responses for 3D modeling operations.
         
         Supported operations:
         - create_box: Creates a rectangular box (parameters: length, width, height in mm)
         - create_cylinder: Creates a cylinder (parameters: radius, height in mm)
         - create_sphere: Creates a sphere (parameters: radius in mm)
+        - create_gear: Creates a spur gear (parameters: number_of_teeth, module in mm, bore_diameter in mm, thickness in mm)
+        - create_hole: Creates a hole in selected face (parameters: diameter in mm, depth in mm)
         - extrude_face: Extrudes selected face (parameters: distance in mm)
         - move_body: Moves selected body (parameters: x, y, z in mm)
         
@@ -80,6 +82,12 @@ class AIService:
             "parameters": {"param1": value1, "param2": value2},
             "message": "Human readable description"
         }
+        
+        For gears, if not specified:
+        - Default module: 2.0mm
+        - Default bore_diameter: 6.0mm
+        - Default thickness: 5.0mm
+        - Default number_of_teeth: 20
         
         If the command is unclear or unsupported, respond with:
         {
@@ -204,10 +212,64 @@ class AIService:
                     "note": "Mock response - no AI API key configured"
                 }
         
+        elif "gear" in command_lower:
+            import re
+            numbers = re.findall(r'\d+(?:\.\d+)?', user_command)
+            
+            # Extract number of teeth if mentioned
+            teeth = 20  # default
+            module = 2.0  # default
+            bore = 6.0  # default
+            thickness = 5.0  # default
+            
+            if numbers:
+                teeth = int(float(numbers[0]))
+                if len(numbers) > 1:
+                    module = float(numbers[1])
+                if len(numbers) > 2:
+                    bore = float(numbers[2])
+                if len(numbers) > 3:
+                    thickness = float(numbers[3])
+            
+            return {
+                "status": "success",
+                "action": "create_gear",
+                "parameters": {
+                    "number_of_teeth": teeth,
+                    "module": module,
+                    "bore_diameter": bore,
+                    "thickness": thickness
+                },
+                "message": f"Creating a gear with {teeth} teeth, module {module}mm",
+                "originalCommand": user_command,
+                "note": "Mock response - no AI API key configured"
+            }
+        
+        elif "hole" in command_lower:
+            import re
+            numbers = re.findall(r'\d+(?:\.\d+)?', user_command)
+            
+            diameter = 5.0  # default
+            depth = 10.0  # default
+            
+            if numbers:
+                diameter = float(numbers[0])
+                if len(numbers) > 1:
+                    depth = float(numbers[1])
+            
+            return {
+                "status": "success",
+                "action": "create_hole",
+                "parameters": {"diameter": diameter, "depth": depth},
+                "message": f"Creating a hole with diameter {diameter}mm and depth {depth}mm",
+                "originalCommand": user_command,
+                "note": "Mock response - no AI API key configured"
+            }
+        
         # Default response for unrecognized commands
         return {
             "status": "error",
-            "message": "Command not recognized. Try 'create a 10mm cube' or 'make a cylinder with radius 5mm and height 20mm'",
+            "message": "Command not recognized. Try 'create a 10mm cube', 'make a cylinder with radius 5mm and height 20mm', 'create a gear with 24 teeth', or 'make a hole with diameter 8mm'",
             "originalCommand": user_command,
             "note": "Mock response - no AI API key configured"
         }

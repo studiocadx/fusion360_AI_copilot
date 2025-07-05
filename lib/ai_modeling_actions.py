@@ -224,7 +224,7 @@ class AIModelingActions:
             return {"status": "error", "message": f"Failed to create sphere: {str(e)}"}
     
     def _create_gear(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
-        """Create a spur gear with specified parameters"""
+        """Create a spur gear with actual teeth"""
         try:
             design = self._get_active_design()
             if not design:
@@ -236,10 +236,12 @@ class AIModelingActions:
             bore_diameter = parameters.get("bore_diameter", 6.0) / 10.0  # Convert mm to cm
             thickness = parameters.get("thickness", 5.0) / 10.0  # Convert mm to cm
             
-            # Calculate gear dimensions
-            pitch_diameter = num_teeth * module / 10.0  # Convert to cm
-            outer_diameter = (num_teeth + 2) * module / 10.0  # Convert to cm
-            root_diameter = (num_teeth - 2.5) * module / 10.0  # Convert to cm
+            # Calculate gear dimensions (convert mm to cm)
+            pitch_diameter = num_teeth * module / 10.0
+            addendum = module / 10.0  # Height of tooth above pitch circle
+            dedendum = 1.25 * module / 10.0  # Depth of tooth below pitch circle
+            outer_diameter = pitch_diameter + 2 * addendum
+            root_diameter = pitch_diameter - 2 * dedendum
             
             # Get the root component
             rootComp = design.rootComponent
@@ -249,29 +251,103 @@ class AIModelingActions:
             xyPlane = rootComp.xYConstructionPlane
             sketch = sketches.add(xyPlane)
             
-            # Create the gear profile using a simplified approach
+            # Create the gear profile with actual teeth
+            lines = sketch.sketchCurves.sketchLines
+            arcs = sketch.sketchCurves.sketchArcs
             circles = sketch.sketchCurves.sketchCircles
             centerPoint = adsk.core.Point3D.create(0, 0, 0)
             
-            # Create outer circle (simplified gear - in production, you'd create actual gear teeth)
-            outer_circle = circles.addByCenterRadius(centerPoint, outer_diameter/2)
+            # Create base circle (root diameter)
+            base_circle = circles.addByCenterRadius(centerPoint, root_diameter/2)
             
-            # Create bore hole
+            # Create gear teeth using simplified rectangular teeth
+            tooth_angle = 2 * math.pi / num_teeth
+            tooth_width_angle = tooth_angle * 0.4  # Tooth takes 40% of the space
+            
+            points = []
+            
+            for i in range(num_teeth):
+                # Calculate angles for this tooth
+                base_angle = i * tooth_angle
+                tooth_start_angle = base_angle - tooth_width_angle/2
+                tooth_end_angle = base_angle + tooth_width_angle/2
+                
+                # Points for the tooth (simplified rectangular tooth)
+                # Root circle points
+                root_start_x = (root_diameter/2) * math.cos(tooth_start_angle)
+                root_start_y = (root_diameter/2) * math.sin(tooth_start_angle)
+                root_end_x = (root_diameter/2) * math.cos(tooth_end_angle)
+                root_end_y = (root_diameter/2) * math.sin(tooth_end_angle)
+                
+                # Outer circle points
+                outer_start_x = (outer_diameter/2) * math.cos(tooth_start_angle)
+                outer_start_y = (outer_diameter/2) * math.sin(tooth_start_angle)
+                outer_end_x = (outer_diameter/2) * math.cos(tooth_end_angle)
+                outer_end_y = (outer_diameter/2) * math.sin(tooth_end_angle)
+                
+                # Create tooth profile
+                p1 = adsk.core.Point3D.create(root_start_x, root_start_y, 0)
+                p2 = adsk.core.Point3D.create(outer_start_x, outer_start_y, 0)
+                p3 = adsk.core.Point3D.create(outer_end_x, outer_end_y, 0)
+                p4 = adsk.core.Point3D.create(root_end_x, root_end_y, 0)
+                
+                # Add lines for tooth
+                lines.addByTwoPoints(p1, p2)  # Rising edge
+                lines.addByTwoPoints(p2, p3)  # Tooth top
+                lines.addByTwoPoints(p3, p4)  # Falling edge
+                
+                # Add arc for root between teeth
+                if i < num_teeth - 1:
+                    next_tooth_start_angle = (i + 1) * tooth_angle - tooth_width_angle/2
+                    next_root_x = (root_diameter/2) * math.cos(next_tooth_start_angle)
+                    next_root_y = (root_diameter/2) * math.sin(next_tooth_start_angle)
+                    next_p1 = adsk.core.Point3D.create(next_root_x, next_root_y, 0)
+                    
+                    # Create arc between teeth at root diameter
+                    mid_angle = (tooth_end_angle + next_tooth_start_angle) / 2
+                    mid_x = (root_diameter/2) * math.cos(mid_angle)
+                    mid_y = (root_diameter/2) * math.sin(mid_angle)
+                    mid_point = adsk.core.Point3D.create(mid_x, mid_y, 0)
+                    
+                    arcs.addByThreePoints(p4, mid_point, next_p1)
+                else:
+                    # Close the last gap
+                    first_root_x = (root_diameter/2) * math.cos(-tooth_width_angle/2)
+                    first_root_y = (root_diameter/2) * math.sin(-tooth_width_angle/2)
+                    first_p1 = adsk.core.Point3D.create(first_root_x, first_root_y, 0)
+                    
+                    mid_angle = (tooth_end_angle + (2 * math.pi - tooth_width_angle/2)) / 2
+                    if mid_angle > 2 * math.pi:
+                        mid_angle -= 2 * math.pi
+                    mid_x = (root_diameter/2) * math.cos(mid_angle)
+                    mid_y = (root_diameter/2) * math.sin(mid_angle)
+                    mid_point = adsk.core.Point3D.create(mid_x, mid_y, 0)
+                    
+                    arcs.addByThreePoints(p4, mid_point, first_p1)
+            
+            # Create bore hole if specified
             if bore_diameter > 0:
                 bore_circle = circles.addByCenterRadius(centerPoint, bore_diameter/2)
             
-            # Get the profile for extrusion (outer circle minus bore)
+            # Get the profile for extrusion
             profiles = sketch.profiles
             gear_profile = None
+            
+            # Find the correct profile (gear body minus bore)
             for i in range(profiles.count):
                 profile = profiles.item(i)
-                # Find the profile that represents the gear body (outer circle minus bore)
                 if profile.profileLoops.count > 0:
-                    gear_profile = profile
-                    break
+                    # Check if this profile represents the gear body
+                    area = profile.areaProperties().area
+                    if area > 0:  # Positive area indicates material
+                        gear_profile = profile
+                        break
+            
+            if not gear_profile and profiles.count > 0:
+                gear_profile = profiles.item(0)
             
             if not gear_profile:
-                gear_profile = profiles.item(0)
+                return {"status": "error", "message": "Failed to create gear profile"}
             
             # Create extrusion
             extrudes = rootComp.features.extrudeFeatures
@@ -284,12 +360,9 @@ class AIModelingActions:
             # Create the extrusion
             extrude = extrudes.add(extrudeInput)
             
-            # Add gear teeth using circular pattern (simplified approach)
-            # In a full implementation, you would create actual involute gear teeth
-            
             return {
                 "status": "success",
-                "message": f"Created gear: {num_teeth} teeth, module {module}mm, bore {bore_diameter*10:.1f}mm, thickness {thickness*10:.1f}mm",
+                "message": f"Created gear with actual teeth: {num_teeth} teeth, module {module}mm, bore {bore_diameter*10:.1f}mm, thickness {thickness*10:.1f}mm",
                 "action": "create_gear",
                 "parameters": {
                     "number_of_teeth": num_teeth,
@@ -330,13 +403,7 @@ class AIModelingActions:
             sketches = rootComp.sketches
             sketch = sketches.add(selectedEntity)
             
-            # Get the center point of the face (simplified - uses face center)
-            boundingBox = selectedEntity.boundingBox
-            centerX = (boundingBox.minPoint.x + boundingBox.maxPoint.x) / 2
-            centerY = (boundingBox.minPoint.y + boundingBox.maxPoint.y) / 2
-            centerZ = (boundingBox.minPoint.z + boundingBox.maxPoint.z) / 2
-            
-            # Create a circle for the hole
+            # Create a circle for the hole at the center of the sketch
             circles = sketch.sketchCurves.sketchCircles
             centerPoint = adsk.core.Point3D.create(0, 0, 0)  # Relative to sketch plane
             circle = circles.addByCenterRadius(centerPoint, diameter/2)

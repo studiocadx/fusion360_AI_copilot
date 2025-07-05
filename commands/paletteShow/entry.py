@@ -2,6 +2,8 @@ import json
 import adsk.core
 import os
 from ...lib import fusionAddInUtils as futil
+from ...lib.ai_service import AIService
+from ...lib.ai_modeling_actions import AIModelingActions
 from ... import config
 from datetime import datetime
 
@@ -10,10 +12,10 @@ ui = app.userInterface
 
 # TODO ********************* Change these names *********************
 CMD_ID = f'{config.COMPANY_NAME}_{config.ADDIN_NAME}_PalleteShow'
-CMD_NAME = 'Show My Palette'
-CMD_Description = 'A Fusion Add-in Palette'
-PALETTE_NAME = 'My Palette Sample'
-IS_PROMOTED = False
+CMD_NAME = 'AI Copilot Palette'
+CMD_Description = 'AI-powered natural language interface for Fusion 360'
+PALETTE_NAME = 'AI Copilot for Fusion 360'
+IS_PROMOTED = True
 
 # Using "global" variables by referencing values from /config.py
 PALETTE_ID = config.sample_palette_id
@@ -43,9 +45,19 @@ ICON_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'resource
 # they are not released and garbage collected.
 local_handlers = []
 
+# Initialize AI service and modeling actions
+ai_service = None
+modeling_actions = None
+
 
 # Executed when add-in is run.
 def start():
+    global ai_service, modeling_actions
+    
+    # Initialize AI service and modeling actions
+    ai_service = AIService()
+    modeling_actions = AIModelingActions()
+    
     # Create a command Definition.
     cmd_def = ui.commandDefinitions.addButtonDefinition(CMD_ID, CMD_NAME, CMD_Description, ICON_FOLDER)
 
@@ -117,8 +129,8 @@ def command_execute(args: adsk.core.CommandEventArgs):
             isVisible=True,
             showCloseButton=True,
             isResizable=True,
-            width=650,
-            height=600,
+            width=700,
+            height=800,
             useNewWebBrowser=True
         )
         futil.add_handler(palette.closed, palette_closed)
@@ -156,6 +168,8 @@ def palette_navigating(args: adsk.core.NavigationEventArgs):
 
 # Use this to handle events sent from javascript in your palette.
 def palette_incoming(html_args: adsk.core.HTMLEventArgs):
+    global ai_service, modeling_actions
+    
     # General logging for debug.
     futil.log(f'{CMD_NAME}: Palette incoming event.')
 
@@ -167,21 +181,86 @@ def palette_incoming(html_args: adsk.core.HTMLEventArgs):
     log_msg += f"Data: {message_data}"
     futil.log(log_msg, adsk.core.LogLevels.InfoLogLevel)
 
-    # TODO ******** Your palette reaction code here ********
+    # Handle AI commands
+    if message_action == 'aiCommand':
+        try:
+            user_command = message_data.get('command', '')
+            session_id = message_data.get('sessionId', '')
+            
+            futil.log(f"Processing AI command: {user_command}")
+            
+            # Send processing status to UI
+            palette = ui.palettes.itemById(PALETTE_ID)
+            processing_response = {
+                "status": "processing",
+                "originalCommand": user_command,
+                "message": "AI is analyzing your command..."
+            }
+            palette.sendInfoToHTML("aiResponse", json.dumps(processing_response))
+            
+            # Process the command with AI service
+            ai_response = ai_service.process_natural_language_command(user_command)
+            
+            futil.log(f"AI Response: {json.dumps(ai_response)}")
+            
+            # If AI successfully parsed the command, execute it
+            if ai_response.get("status") == "success" and ai_response.get("action"):
+                execution_result = modeling_actions.execute_command(ai_response)
+                
+                # Merge AI response with execution result
+                final_response = {
+                    **ai_response,
+                    **execution_result,
+                    "originalCommand": user_command,
+                    "sessionId": session_id
+                }
+            else:
+                # AI couldn't parse the command or there was an error
+                final_response = {
+                    **ai_response,
+                    "originalCommand": user_command,
+                    "sessionId": session_id
+                }
+            
+            # Send final response to UI
+            palette.sendInfoToHTML("aiResponse", json.dumps(final_response))
+            
+            # Set return data for the HTML promise
+            html_args.returnData = json.dumps(final_response)
+            
+        except Exception as e:
+            error_response = {
+                "status": "error",
+                "message": f"System error: {str(e)}",
+                "originalCommand": message_data.get('command', ''),
+                "sessionId": message_data.get('sessionId', '')
+            }
+            
+            futil.log(f"AI Command Error: {str(e)}", adsk.core.LogLevels.ErrorLogLevel)
+            
+            # Send error to UI
+            palette = ui.palettes.itemById(PALETTE_ID)
+            palette.sendInfoToHTML("aiResponse", json.dumps(error_response))
+            
+            html_args.returnData = json.dumps(error_response)
 
-    # Read message sent from palette javascript and react appropriately.
-    if message_action == 'messageFromPalette':
+    # Handle legacy message from palette (for backward compatibility)
+    elif message_action == 'messageFromPalette':
         arg1 = message_data.get('arg1', 'arg1 not sent')
         arg2 = message_data.get('arg2', 'arg2 not sent')
 
         msg = 'An event has been fired from the html to Fusion with the following data:<br/>'
         msg += f'<b>Action</b>: {message_action}<br/><b>arg1</b>: {arg1}<br/><b>arg2</b>: {arg2}'               
         ui.messageBox(msg)
-
-    # Return value.
-    now = datetime.now()
-    currentTime = now.strftime('%H:%M:%S')
-    html_args.returnData = f'OK - {currentTime}'
+        
+        # Return value for legacy compatibility
+        now = datetime.now()
+        currentTime = now.strftime('%H:%M:%S')
+        html_args.returnData = f'OK - {currentTime}'
+    
+    else:
+        # Unknown action
+        html_args.returnData = f'Unknown action: {message_action}'
 
 
 # This event handler is called when the command terminates.

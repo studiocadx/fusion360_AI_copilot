@@ -11,541 +11,441 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --bg-tertiary: #1a1a1a;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --border: #27272a;
+            --border-light: #3f3f46;
+            --accent: #0ea5e9;
+            --accent-hover: #0284c7;
+            --accent-light: rgba(14, 165, 233, 0.1);
+            --success: #22c55e;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --radius: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: #0a0a0a;
-            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             min-height: 100vh;
-            padding: 16px;
-            overflow-x: hidden;
             line-height: 1.6;
+            overflow-x: hidden;
         }
 
         .container {
-            max-width: 680px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(24px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 32px;
-            padding: 40px;
-            box-shadow: 
-                0 20px 40px rgba(0, 0, 0, 0.4),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            position: relative;
-            overflow: hidden;
+            max-width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-primary);
         }
 
-        .container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-        }
-
-        .brand-header {
+        /* Header */
+        .header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-secondary);
             text-align: center;
-            margin-bottom: 48px;
-            position: relative;
         }
 
         .brand-logo {
-            font-size: 42px;
+            font-size: 28px;
             font-weight: 800;
-            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 50%, #ffffff 100%);
+            background: linear-gradient(135deg, var(--accent) 0%, #0284c7 50%, var(--text-primary) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 12px;
-            letter-spacing: 3px;
-            text-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
-        }
-
-        .brand-subtitle {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 18px;
-            font-weight: 300;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        .ai-input-section {
-            margin-bottom: 40px;
-        }
-
-        .section-title {
-            color: #ffffff;
-            margin-bottom: 24px;
-            font-size: 20px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .section-title::before {
-            content: '';
-            width: 4px;
-            height: 24px;
-            background: linear-gradient(135deg, #00d4ff, #0099cc);
-            border-radius: 8px;
-        }
-
-        #aiCommandInput {
-            width: 100%;
-            height: 140px;
-            padding: 24px;
-            background: rgba(255, 255, 255, 0.04);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            font-size: 16px;
-            font-family: inherit;
-            color: #ffffff;
-            resize: vertical;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            outline: none;
-            line-height: 1.5;
-        }
-
-        #aiCommandInput::placeholder {
-            color: rgba(255, 255, 255, 0.4);
-        }
-
-        #aiCommandInput:focus {
-            border-color: rgba(0, 212, 255, 0.4);
-            box-shadow: 
-                0 0 32px rgba(0, 212, 255, 0.15),
-                inset 0 1px 0 rgba(255, 255, 255, 0.08);
-            background: rgba(255, 255, 255, 0.06);
-            transform: translateY(-2px);
-        }
-
-        .button-container {
-            margin-top: 24px;
-            text-align: center;
-        }
-
-        .ai-button {
-            background: linear-gradient(135deg, #00d4ff, #0099cc);
-            color: #ffffff;
-            border: none;
-            padding: 20px 40px;
-            border-radius: 60px;
-            font-size: 17px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            min-width: 200px;
-            box-shadow: 
-                0 8px 32px rgba(0, 212, 255, 0.25),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            position: relative;
-            overflow: hidden;
+            margin-bottom: 8px;
             letter-spacing: 1px;
         }
 
-        .ai-button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
-            transition: left 0.6s ease;
+        .brand-subtitle {
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
         }
 
-        .ai-button:hover::before {
-            left: 100%;
+        /* Chat Container */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            gap: 24px;
+            overflow-y: auto;
         }
 
-        .ai-button:hover {
-            background: linear-gradient(135deg, #0099cc, #007acc);
-            transform: translateY(-3px);
-            box-shadow: 
-                0 12px 40px rgba(0, 212, 255, 0.35),
-                inset 0 1px 0 rgba(255, 255, 255, 0.25);
+        /* Chat Messages */
+        .messages-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
         }
 
-        .ai-button:active {
+        .message {
+            display: flex;
+            gap: 12px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .message.user .message-avatar {
+            background: var(--accent);
+            color: white;
+        }
+
+        .message.assistant .message-avatar {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-light);
+            color: var(--text-secondary);
+        }
+
+        .message-content {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .message.user .message-content {
+            background: var(--accent);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.assistant .message-content {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-light);
+            color: var(--text-primary);
+            border-bottom-left-radius: 4px;
+        }
+
+        /* Status Messages */
+        .status-message {
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            font-size: 13px;
+            font-weight: 500;
+            text-align: center;
+            margin: 8px 0;
+            border: 1px solid;
+        }
+
+        .status-message.loading {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+        }
+
+        .status-message.success {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+        }
+
+        .status-message.error {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
+
+        /* Chat Input */
+        .chat-input-container {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .chat-input-container:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-light);
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            padding: 8px;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-primary);
+            font-size: 14px;
+            line-height: 1.5;
+            resize: none;
+            min-height: 44px;
+            max-height: 120px;
+            padding: 8px 12px;
+            font-family: inherit;
+        }
+
+        .chat-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .send-button {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: var(--accent);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .send-button:hover:not(:disabled) {
+            background: var(--accent-hover);
+            transform: scale(1.05);
+        }
+
+        .send-button:disabled {
+            background: var(--text-muted);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .send-button svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .quick-action {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+        }
+
+        .quick-action:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--border-light);
             transform: translateY(-1px);
         }
 
-        .ai-button:disabled {
-            background: rgba(255, 255, 255, 0.08);
-            color: rgba(255, 255, 255, 0.4);
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .mock-models-section {
-            margin-bottom: 40px;
-            background: rgba(255, 255, 255, 0.02);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 28px;
-            padding: 32px;
-        }
-
-        .mock-models-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .mock-model-card {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
-            padding: 24px 20px;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .mock-model-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, #00d4ff, #0099cc, #00d4ff);
-            transform: translateX(-100%);
-            transition: transform 0.4s ease;
-        }
-
-        .mock-model-card:hover::before {
-            transform: translateX(0);
-        }
-
-        .mock-model-card:hover {
-            background: rgba(255, 255, 255, 0.06);
-            border-color: rgba(0, 212, 255, 0.2);
-            transform: translateY(-4px);
-            box-shadow: 0 12px 32px rgba(0, 212, 255, 0.15);
-        }
-
-        .mock-model-icon {
-            font-size: 36px;
-            margin-bottom: 16px;
-            display: block;
-            filter: drop-shadow(0 2px 8px rgba(0, 212, 255, 0.3));
-        }
-
-        .mock-model-title {
-            font-size: 15px;
-            font-weight: 700;
-            color: #ffffff;
+        .quick-action-icon {
+            font-size: 20px;
             margin-bottom: 8px;
-            letter-spacing: 0.5px;
+            display: block;
         }
 
-        .mock-model-desc {
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.6);
+        .quick-action-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .quick-action-desc {
+            font-size: 11px;
+            color: var(--text-secondary);
             line-height: 1.4;
         }
 
-        .response-section {
-            margin-top: 40px;
-        }
-
-        #aiResponse {
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
-            padding: 24px;
-            min-height: 100px;
-            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
-            font-size: 14px;
-            line-height: 1.6;
-            color: #e8e8e8;
-            white-space: pre-wrap;
-            box-shadow: inset 0 2px 12px rgba(0, 0, 0, 0.4);
-        }
-
-        .status {
-            padding: 20px 24px;
-            border-radius: 16px;
-            margin: 20px 0;
-            font-weight: 600;
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .status::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 4px;
-            border-radius: 0 2px 2px 0;
-        }
-
-        .status.loading {
-            background: rgba(33, 150, 243, 0.12);
-            color: #64b5f6;
-            border-color: rgba(33, 150, 243, 0.2);
-        }
-
-        .status.loading::before {
-            background: linear-gradient(180deg, #2196f3, #64b5f6);
-        }
-
-        .status.success {
-            background: rgba(76, 175, 80, 0.12);
-            color: #81c784;
-            border-color: rgba(76, 175, 80, 0.2);
-        }
-
-        .status.success::before {
-            background: linear-gradient(180deg, #4caf50, #81c784);
-        }
-
-        .status.error {
-            background: rgba(244, 67, 54, 0.12);
-            color: #e57373;
-            border-color: rgba(244, 67, 54, 0.2);
-        }
-
-        .status.error::before {
-            background: linear-gradient(180deg, #f44336, #e57373);
-        }
-
-        .examples {
-            margin-top: 24px;
-            padding: 24px;
-            background: rgba(0, 212, 255, 0.06);
-            backdrop-filter: blur(16px);
-            border-radius: 20px;
-            border: 1px solid rgba(0, 212, 255, 0.15);
-        }
-
-        .examples h4 {
-            margin: 0 0 16px 0;
-            color: #00d4ff;
-            font-size: 15px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-
-        .examples ul {
-            margin: 0;
-            padding-left: 24px;
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.8);
-        }
-
-        .examples li {
-            margin-bottom: 10px;
-            position: relative;
-        }
-
-        .examples li::marker {
-            color: #00d4ff;
-        }
-
-        /* Enhanced scrollbar styling */
+        /* Scrollbar */
         ::-webkit-scrollbar {
-            width: 10px;
+            width: 6px;
         }
 
         ::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 8px;
+            background: var(--bg-secondary);
         }
 
         ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 8px;
-            border: 2px solid transparent;
-            background-clip: content-box;
+            background: var(--border-light);
+            border-radius: 3px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.25);
-            background-clip: content-box;
+            background: var(--text-muted);
         }
 
-        /* Enhanced loading animation */
+        /* Animations */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.7; transform: scale(0.98); }
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
 
-        @keyframes shimmer {
-            0% { background-position: -200px 0; }
-            100% { background-position: calc(200px + 100%) 0; }
+        .loading-dots {
+            display: inline-flex;
+            gap: 2px;
         }
 
-        .loading-animation {
-            animation: pulse 2s ease-in-out infinite;
+        .loading-dots span {
+            width: 4px;
+            height: 4px;
+            background: currentColor;
+            border-radius: 50%;
+            animation: pulse 1.4s ease-in-out infinite;
         }
 
-        .shimmer {
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            background-size: 200px 100%;
-            animation: shimmer 1.5s infinite;
+        .loading-dots span:nth-child(2) {
+            animation-delay: 0.2s;
         }
 
-        /* Responsive design */
+        .loading-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        /* Responsive */
         @media (max-width: 600px) {
-            .container {
-                margin: 8px;
-                padding: 24px;
-                border-radius: 24px;
+            .chat-container {
+                padding: 16px;
             }
 
-            .mock-models-grid {
-                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-                gap: 16px;
+            .header {
+                padding: 16px;
             }
 
-            .brand-logo {
-                font-size: 36px;
+            .quick-actions {
+                grid-template-columns: 1fr;
             }
 
-            .brand-subtitle {
-                font-size: 16px;
-            }
-
-            #aiCommandInput {
-                height: 120px;
-                padding: 20px;
-            }
-
-            .ai-button {
-                padding: 18px 32px;
-                font-size: 16px;
+            .message-content {
+                max-width: 90%;
             }
         }
 
         /* Focus states for accessibility */
-        .mock-model-card:focus,
-        .ai-button:focus,
-        #aiCommandInput:focus {
-            outline: 2px solid rgba(0, 212, 255, 0.5);
+        .quick-action:focus,
+        .send-button:focus,
+        .chat-input:focus {
+            outline: 2px solid var(--accent);
             outline-offset: 2px;
-        }
-
-        /* High contrast mode support */
-        @media (prefers-contrast: high) {
-            .container {
-                border-color: rgba(255, 255, 255, 0.3);
-            }
-            
-            .section-title::before {
-                background: #00d4ff;
-            }
-            
-            #aiCommandInput {
-                border-color: rgba(255, 255, 255, 0.3);
-            }
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <div class="brand-header">
+    <div class="header">
         <div class="brand-logo">CadxStudio</div>
         <div class="brand-subtitle">AI Copilot for Fusion 360</div>
     </div>
     
-    <div class="ai-input-section">
-        <h3 class="section-title">Natural Language Commands</h3>
-        <textarea 
-            id="aiCommandInput" 
-            placeholder="Describe what you want to create... e.g., 'Create a gear with 24 teeth' or 'Make a hole with diameter 8mm'"
-        ></textarea>
-        
-        <div class="button-container">
-            <button type="button" class="ai-button" onclick="sendAICommand()" id="aiSubmitBtn">
-                🚀 Execute Command
-            </button>
+    <div class="chat-container">
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <div class="quick-action" onclick="insertQuickCommand('Create a gear with 24 teeth and 6mm bore')" tabindex="0">
+                <span class="quick-action-icon">⚙️</span>
+                <div class="quick-action-title">Standard Gear</div>
+                <div class="quick-action-desc">24 teeth, 6mm bore</div>
+            </div>
+            
+            <div class="quick-action" onclick="insertQuickCommand('Create a gear with 40 teeth, module 3mm, bore 12mm')" tabindex="0">
+                <span class="quick-action-icon">🔧</span>
+                <div class="quick-action-title">Large Gear</div>
+                <div class="quick-action-desc">40 teeth, 3mm module</div>
+            </div>
+            
+            <div class="quick-action" onclick="insertQuickCommand('Make a hole with diameter 8mm and depth 15mm')" tabindex="0">
+                <span class="quick-action-icon">🕳️</span>
+                <div class="quick-action-title">Standard Hole</div>
+                <div class="quick-action-desc">8mm diameter, 15mm depth</div>
+            </div>
+            
+            <div class="quick-action" onclick="insertQuickCommand('Create a 20mm cube')" tabindex="0">
+                <span class="quick-action-icon">🟦</span>
+                <div class="quick-action-title">Cube</div>
+                <div class="quick-action-desc">20mm × 20mm × 20mm</div>
+            </div>
         </div>
-        
-        <div class="examples">
-            <h4>💡 Example Commands:</h4>
-            <ul>
-                <li>"Create a gear with 24 teeth and 6mm bore"</li>
-                <li>"Make a hole with diameter 8mm and depth 15mm"</li>
-                <li>"Create a 20mm cube"</li>
-                <li>"Make a cylinder with radius 10mm and height 25mm"</li>
-                <li>"Create a sphere with radius 12mm"</li>
-            </ul>
-        </div>
-    </div>
 
-    <div class="mock-models-section">
-        <h3 class="section-title">Quick Model Templates</h3>
-        <div class="mock-models-grid">
-            <div class="mock-model-card" onclick="insertMockCommand('Create a gear with 20 teeth, module 2mm, and bore 6mm')" tabindex="0">
-                <span class="mock-model-icon">⚙️</span>
-                <div class="mock-model-title">Spur Gear</div>
-                <div class="mock-model-desc">20 teeth, 2mm module, 6mm bore</div>
-            </div>
-            
-            <div class="mock-model-card" onclick="insertMockCommand('Create a gear with 30 teeth, module 1.5mm, and bore 8mm')" tabindex="0">
-                <span class="mock-model-icon">🔧</span>
-                <div class="mock-model-title">Fine Gear</div>
-                <div class="mock-model-desc">30 teeth, 1.5mm module, 8mm bore</div>
-            </div>
-            
-            <div class="mock-model-card" onclick="insertMockCommand('Make a hole with diameter 6mm and depth 10mm')" tabindex="0">
-                <span class="mock-model-icon">🕳️</span>
-                <div class="mock-model-title">Standard Hole</div>
-                <div class="mock-model-desc">6mm diameter, 10mm depth</div>
-            </div>
-            
-            <div class="mock-model-card" onclick="insertMockCommand('Make a hole with diameter 3mm and depth 5mm')" tabindex="0">
-                <span class="mock-model-icon">⚫</span>
-                <div class="mock-model-title">Small Hole</div>
-                <div class="mock-model-desc">3mm diameter, 5mm depth</div>
-            </div>
-            
-            <div class="mock-model-card" onclick="insertMockCommand('Create a 20mm cube')" tabindex="0">
-                <span class="mock-model-icon">🟦</span>
-                <div class="mock-model-title">Standard Cube</div>
-                <div class="mock-model-desc">20mm × 20mm × 20mm</div>
-            </div>
-            
-            <div class="mock-model-card" onclick="insertMockCommand('Make a cylinder with radius 10mm and height 25mm')" tabindex="0">
-                <span class="mock-model-icon">🔵</span>
-                <div class="mock-model-title">Basic Cylinder</div>
-                <div class="mock-model-desc">Radius: 10mm, Height: 25mm</div>
-            </div>
-            
-            <div class="mock-model-card" onclick="insertMockCommand('Create a sphere with radius 8mm')" tabindex="0">
-                <span class="mock-model-icon">⚪</span>
-                <div class="mock-model-title">Small Sphere</div>
-                <div class="mock-model-desc">Radius: 8mm</div>
-            </div>
-            
-            <div class="mock-model-card" onclick="insertMockCommand('Create a gear with 40 teeth, module 3mm, bore 12mm, and thickness 8mm')" tabindex="0">
-                <span class="mock-model-icon">⚙️</span>
-                <div class="mock-model-title">Large Gear</div>
-                <div class="mock-model-desc">40 teeth, 3mm module, 12mm bore</div>
+        <!-- Messages Container -->
+        <div class="messages-container" id="messagesContainer">
+            <div class="message assistant">
+                <div class="message-avatar">AI</div>
+                <div class="message-content">
+                    Welcome to CadxStudio AI Copilot! I can help you create 3D models using natural language. Try asking me to create gears, holes, basic shapes, or use the quick actions above.
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="response-section">
-        <h3 class="section-title">AI Response & Status</h3>
-        <div id="aiResponse">Ready to receive commands from CadxStudio AI Copilot...</div>
+        <!-- Chat Input -->
+        <div class="chat-input-container">
+            <div class="chat-input-wrapper">
+                <textarea 
+                    id="chatInput" 
+                    class="chat-input"
+                    placeholder="Describe what you want to create..."
+                    rows="1"
+                ></textarea>
+                <button type="button" class="send-button" onclick="sendChatMessage()" id="sendBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 19l7-7 3 3-7 7-3-3z"/>
+                        <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
+                        <path d="M2 2l7.586 7.586"/>
+                        <circle cx="11" cy="11" r="2"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 </body>

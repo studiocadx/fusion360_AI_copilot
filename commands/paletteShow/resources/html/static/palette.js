@@ -5,50 +5,94 @@ function getDateString() {
     return `Date: ${date}, Time: ${time}`;
 }
 
-// New function to insert mock commands
-function insertMockCommand(command) {
-    const commandInput = document.getElementById("aiCommandInput");
-    commandInput.value = command;
-    commandInput.focus();
+// Chat functionality
+let messageHistory = [];
+
+function insertQuickCommand(command) {
+    const chatInput = document.getElementById("chatInput");
+    chatInput.value = command;
+    chatInput.focus();
     
     // Add a subtle animation to show the command was inserted
-    commandInput.style.transform = "scale(1.02)";
+    chatInput.style.transform = "scale(1.02)";
     setTimeout(() => {
-        commandInput.style.transform = "scale(1)";
+        chatInput.style.transform = "scale(1)";
     }, 200);
 }
 
-// Legacy function for testing
-function sendInfoToFusion() {
-    const args = {
-        arg1: document.getElementById("sampleData").value,
-        arg2: getDateString()
-    };
-
-    // Send the data to Fusion as a JSON string. The return value is a Promise.
-    adsk.fusionSendData("messageFromPalette", JSON.stringify(args)).then((result) =>
-        document.getElementById("returnValue").innerHTML = `${result}`
-    );
+function addMessage(content, type = 'user') {
+    const messagesContainer = document.getElementById('messagesContainer');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${type}`;
+    
+    const avatar = document.createElement('div');
+    avatar.className = 'message-avatar';
+    avatar.textContent = type === 'user' ? 'U' : 'AI';
+    
+    const messageContent = document.createElement('div');
+    messageContent.className = 'message-content';
+    messageContent.textContent = content;
+    
+    messageDiv.appendChild(avatar);
+    messageDiv.appendChild(messageContent);
+    
+    messagesContainer.appendChild(messageDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    // Store in history
+    messageHistory.push({ content, type, timestamp: new Date() });
 }
 
-// New AI Command function
-function sendAICommand() {
-    const commandInput = document.getElementById("aiCommandInput");
-    const responseDiv = document.getElementById("aiResponse");
-    const submitBtn = document.getElementById("aiSubmitBtn");
+function addStatusMessage(message, type = 'loading') {
+    const messagesContainer = document.getElementById('messagesContainer');
+    const statusDiv = document.createElement('div');
+    statusDiv.className = `status-message ${type}`;
+    statusDiv.id = 'currentStatus';
     
-    const userCommand = commandInput.value.trim();
+    if (type === 'loading') {
+        statusDiv.innerHTML = `${message} <span class="loading-dots"><span></span><span></span><span></span></span>`;
+    } else {
+        statusDiv.textContent = message;
+    }
+    
+    // Remove existing status message
+    const existingStatus = document.getElementById('currentStatus');
+    if (existingStatus) {
+        existingStatus.remove();
+    }
+    
+    messagesContainer.appendChild(statusDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    return statusDiv;
+}
+
+function removeStatusMessage() {
+    const statusDiv = document.getElementById('currentStatus');
+    if (statusDiv) {
+        statusDiv.remove();
+    }
+}
+
+function sendChatMessage() {
+    const chatInput = document.getElementById("chatInput");
+    const sendBtn = document.getElementById("sendBtn");
+    
+    const userCommand = chatInput.value.trim();
     
     if (!userCommand) {
-        showStatus("Please enter a command first.", "error");
         return;
     }
     
-    // Disable button and show loading state
-    submitBtn.disabled = true;
-    submitBtn.textContent = "🔄 Processing...";
-    submitBtn.classList.add("loading-animation");
-    showStatus("Sending command to AI Copilot...", "loading");
+    // Add user message to chat
+    addMessage(userCommand, 'user');
+    
+    // Clear input and disable button
+    chatInput.value = '';
+    sendBtn.disabled = true;
+    
+    // Show loading status
+    addStatusMessage("CadxStudio AI is analyzing your command...", "loading");
     
     const commandData = {
         command: userCommand,
@@ -64,83 +108,56 @@ function sendAICommand() {
         })
         .catch((error) => {
             console.error("Error sending AI command:", error);
-            showStatus("Error communicating with Fusion 360. Please try again.", "error");
+            removeStatusMessage();
+            addMessage("Error communicating with Fusion 360. Please try again.", 'assistant');
         })
         .finally(() => {
             // Re-enable button
-            submitBtn.disabled = false;
-            submitBtn.textContent = "🚀 Execute Command";
-            submitBtn.classList.remove("loading-animation");
+            sendBtn.disabled = false;
         });
 }
 
 function handleAIResponse(response) {
-    const responseDiv = document.getElementById("aiResponse");
+    removeStatusMessage();
     
     try {
         // Try to parse as JSON first
         const parsedResponse = JSON.parse(response);
         
         if (parsedResponse.status === "success") {
-            showStatus("✅ Command executed successfully!", "success");
-            responseDiv.innerHTML = `Command: "${parsedResponse.originalCommand}"\n` +
-                                  `Action: ${parsedResponse.action}\n` +
-                                  `Parameters: ${JSON.stringify(parsedResponse.parameters, null, 2)}\n` +
-                                  `Result: ${parsedResponse.message}`;
+            addStatusMessage("✅ Command executed successfully!", "success");
+            const message = `Created: ${parsedResponse.action.replace('_', ' ')} with parameters: ${JSON.stringify(parsedResponse.parameters)}`;
+            addMessage(message, 'assistant');
         } else if (parsedResponse.status === "error") {
-            showStatus("❌ Command failed to execute", "error");
-            responseDiv.innerHTML = `Error: ${parsedResponse.message}\n` +
-                                  `Command: "${parsedResponse.originalCommand}"`;
+            addStatusMessage("❌ Command failed to execute", "error");
+            addMessage(`Error: ${parsedResponse.message}`, 'assistant');
         } else if (parsedResponse.status === "processing") {
-            showStatus("🔄 AI is processing your command...", "loading");
-            responseDiv.innerHTML = `Processing: "${parsedResponse.originalCommand}"\n` +
-                                  `AI Response: ${parsedResponse.aiResponse || "Analyzing command..."}`;
+            addStatusMessage("🔄 AI is processing your command...", "loading");
         }
     } catch (e) {
         // If not JSON, treat as plain text
-        responseDiv.innerHTML = response;
-        showStatus("Response received", "success");
-    }
-}
-
-function showStatus(message, type) {
-    const responseDiv = document.getElementById("aiResponse");
-    
-    // Create or update status element
-    let statusDiv = document.getElementById("statusMessage");
-    if (!statusDiv) {
-        statusDiv = document.createElement("div");
-        statusDiv.id = "statusMessage";
-        responseDiv.parentNode.insertBefore(statusDiv, responseDiv);
+        addMessage(response, 'assistant');
     }
     
-    statusDiv.className = `status ${type}`;
-    statusDiv.textContent = message;
-    
-    // Auto-hide success/error messages after 5 seconds
-    if (type !== "loading") {
-        setTimeout(() => {
-            if (statusDiv && statusDiv.parentNode) {
-                statusDiv.remove();
-            }
-        }, 5000);
-    }
+    // Auto-remove status messages after 3 seconds
+    setTimeout(() => {
+        const statusMsg = document.querySelector('.status-message');
+        if (statusMsg) {
+            statusMsg.style.opacity = '0';
+            setTimeout(() => statusMsg.remove(), 300);
+        }
+    }, 3000);
 }
 
 function generateSessionId() {
     return 'session_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
 }
 
-// Legacy function for updating messages from Fusion
-function updateMessage(messageString) {
-    // Message is sent from the add-in as a JSON string.
-    const messageData = JSON.parse(messageString);
-
-    // Update a paragraph with the data passed in.
-    document.getElementById("fusionMessage").innerHTML =
-        `<b>Your text</b>: ${messageData.myText} <br/>` +
-        `<b>Your expression</b>: ${messageData.myExpression} <br/>` +
-        `<b>Your value</b>: ${messageData.myValue}`;
+// Auto-resize textarea
+function autoResizeTextarea() {
+    const chatInput = document.getElementById('chatInput');
+    chatInput.style.height = 'auto';
+    chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
 }
 
 // Enhanced handler for AI responses
@@ -153,19 +170,61 @@ function handleAIUpdate(messageString) {
     }
 }
 
-// Allow Enter key to submit command
+// Event listeners
 document.addEventListener('DOMContentLoaded', function() {
-    const commandInput = document.getElementById('aiCommandInput');
-    if (commandInput) {
-        commandInput.addEventListener('keydown', function(event) {
+    const chatInput = document.getElementById('chatInput');
+    
+    if (chatInput) {
+        // Auto-resize on input
+        chatInput.addEventListener('input', autoResizeTextarea);
+        
+        // Send on Ctrl+Enter
+        chatInput.addEventListener('keydown', function(event) {
             if (event.ctrlKey && event.key === 'Enter') {
                 event.preventDefault();
-                sendAICommand();
+                sendChatMessage();
+            }
+        });
+        
+        // Send on Enter (without Shift)
+        chatInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' && !event.shiftKey && !event.ctrlKey) {
+                event.preventDefault();
+                sendChatMessage();
             }
         });
     }
+    
+    // Add keyboard support for quick actions
+    document.querySelectorAll('.quick-action').forEach(action => {
+        action.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                action.click();
+            }
+        });
+    });
 });
 
+// Legacy functions for backward compatibility
+function sendInfoToFusion() {
+    const args = {
+        arg1: "Legacy test",
+        arg2: getDateString()
+    };
+
+    adsk.fusionSendData("messageFromPalette", JSON.stringify(args)).then((result) =>
+        addMessage(`Legacy response: ${result}`, 'assistant')
+    );
+}
+
+function updateMessage(messageString) {
+    const messageData = JSON.parse(messageString);
+    const message = `Text: ${messageData.myText}, Expression: ${messageData.myExpression}, Value: ${messageData.myValue}`;
+    addMessage(message, 'assistant');
+}
+
+// Fusion 360 JavaScript Handler
 window.fusionJavaScriptHandler = {
     handle: function (action, data) {
         try {
